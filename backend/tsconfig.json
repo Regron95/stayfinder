@@ -1,0 +1,11 @@
+{
+  "compilerOptions" : {
+    "target": "esnext", //Vilken version av JavaScript. 
+    "module": "nodenext", // modulsystem 
+    "strict": true, // Aktiverar alla strikta typkontroller i TypeScript. 
+    "rootDir": "./src", // rotmapp - TypeScript-källkoden
+    "outDir": "./dist", // kompilerade JS hamnar här (körs i Node.js)
+    "types": ["node"], //  typer som ska inkluderas 
+    "skipLibCheck": true, // Hoppa över typkontroller för deklarationsfiler
+  }
+}
