@@ -67,3 +67,20 @@ GET {{baseUrl}}/properties/2
 
 ### Ta bort boende som inte finns → 404
 DELETE {{baseUrl}}/properties/999
+
+### PATCH med ogiltigt pris → 400
+PATCH {{baseUrl}}/properties/1
+Content-Type: application/json
+
+{
+  "price_per_night": "gratis"
+}
+
+### Okänd route → 404 JSON
+GET {{baseUrl}}/finns-inte
+
+### Trasig JSON → 400
+POST {{baseUrl}}/properties
+Content-Type: application/json
+
+{ detta är inte json

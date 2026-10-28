@@ -1,5 +1,10 @@
 import { Hono } from "hono";
-import type { NewProperty, Property } from "../types/property.js";
+import type { Property } from "../types/property.js";
+import { validateJson } from "../middleware/validate.js";
+import {
+  createPropertySchema,
+  updatePropertySchema,
+} from "../validators/property.js";
 
 // Mock data för fastigheter > Supabase ska användas i framtiden
 const properties: Property[] = [
@@ -42,8 +47,8 @@ propertiesApp.get("/:id", (c) => {
 });
 
 // Route för att skapa en ny fastighet
-propertiesApp.post("/", async (c) => {
-  const body = await c.req.json<NewProperty>();
+propertiesApp.post("/", validateJson(createPropertySchema), (c) => {
+  const body = c.req.valid("json");
 
   const newProperty: Property = {
     ...body,
@@ -55,14 +60,14 @@ propertiesApp.post("/", async (c) => {
 });
 
 // Route för att uppdatera en fastighet baserat på ID
-propertiesApp.patch("/:id", async (c) => {
+propertiesApp.patch("/:id", validateJson(updatePropertySchema), (c) => {
   const { id } = c.req.param();
   const index = properties.findIndex((p) => p.id === id);
 
   if (index === -1) {
     return c.json({ error: "Property not found" }, 404);
   }
-  const body = await c.req.json<Partial<NewProperty>>();
+  const body = c.req.valid("json");
   const existing = properties[index];
 
   const updated: Property = {
