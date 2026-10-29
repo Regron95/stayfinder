@@ -1,95 +1,77 @@
 import { Hono } from "hono";
 import type { Property } from "../types/property.js";
-import { validateJson } from "../middleware/validate.js";
+import { validate } from "../middleware/validate.js";
 import {
   createPropertySchema,
   updatePropertySchema,
+  idParamSchema,
 } from "../validators/property.js";
+import { supabase } from "../lib/supabase.js";
 
-// Mock data för fastigheter > Supabase ska användas i framtiden
-const properties: Property[] = [
-  {
-    id: "1",
-    title: "Stuga vid sjön",
-    description: "Mysig stuga med egen brygga vid sjön.",
-    location: "Dalarna, Sverige",
-    price_per_night: 900,
-    max_guests: 4,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Lägenhet i city",
-    description: "Nära tunnelbanan",
-    location: "Stockholm, Sverige",
-    price_per_night: 1400,
-    max_guests: 2,
-    created_at: new Date().toISOString(),
-  },
-];
-
-// Skapar en ny Hono-app för fastigheter
 const propertiesApp = new Hono();
 
-// Route för att hämta alla fastigheter
-propertiesApp.get("/", (c) => {
-  return c.json(properties);
+propertiesApp.get("/", async (c) => {
+  const { data, error } = await supabase.from("properties").select("*");
+  if (error) throw new Error(error.message);
+  return c.json(data as Property[]);
 });
 
-// Route för att hämta en fastighet baserat på ID
-propertiesApp.get("/:id", (c) => {
-  const { id } = c.req.param();
-  const property = properties.find((p) => p.id === id);
-  if (!property) {
-    return c.json({ error: "Property not found" }, 404);
-  }
-  return c.json(property);
+propertiesApp.get("/:id", validate("param", idParamSchema), async (c) => {
+  const { id } = c.req.valid("param");
+  const { data, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return c.json({ error: "Property not found" }, 404);
+  return c.json(data as Property);
 });
 
-// Route för att skapa en ny fastighet
-propertiesApp.post("/", validateJson(createPropertySchema), (c) => {
+propertiesApp.post("/", validate("json", createPropertySchema), async (c) => {
   const body = c.req.valid("json");
+  const { data, error } = await supabase
+    .from("properties")
+    .insert(body)
+    .select()
+    .single();
 
-  const newProperty: Property = {
-    ...body,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  };
-  properties.push(newProperty);
-  return c.json(newProperty, 201);
+  if (error) throw new Error(error.message);
+  return c.json(data as Property, 201);
 });
 
-// Route för att uppdatera en fastighet baserat på ID
-propertiesApp.patch("/:id", validateJson(updatePropertySchema), (c) => {
-  const { id } = c.req.param();
-  const index = properties.findIndex((p) => p.id === id);
+propertiesApp.patch(
+  "/:id",
+  validate("param", idParamSchema),
+  validate("json", updatePropertySchema),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const body = c.req.valid("json");
+    const { data, error } = await supabase
+      .from("properties")
+      .update(body)
+      .eq("id", id)
+      .select()
+      .maybeSingle();
 
-  if (index === -1) {
-    return c.json({ error: "Property not found" }, 404);
-  }
-  const body = c.req.valid("json");
-  const existing = properties[index];
+    if (error) throw new Error(error.message);
+    if (!data) return c.json({ error: "Property not found" }, 404);
+    return c.json(data as Property);
+  },
+);
 
-  const updated: Property = {
-    ...existing,
-    ...body,
-    id: existing.id,
-    created_at: existing.created_at,
-  };
-  properties[index] = updated;
-  return c.json(updated);
-});
+propertiesApp.delete("/:id", validate("param", idParamSchema), async (c) => {
+  const { id } = c.req.valid("param");
+  const { data, error } = await supabase
+    .from("properties")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle();
 
-// Route för att ta bort en fastighet baserat på ID
-propertiesApp.delete("/:id", (c) => {
-  const { id } = c.req.param();
-  const index = properties.findIndex((p) => p.id === id);
-
-  if (index === -1) {
-    return c.json({ error: "Property not found" }, 404);
-  }
-
-  properties.splice(index, 1);
+  if (error) throw new Error(error.message);
+  if (!data) return c.json({ error: "Property not found" }, 404);
   return c.json({ message: "Property deleted" });
 });
 

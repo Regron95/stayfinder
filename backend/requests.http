@@ -1,15 +1,12 @@
 @baseUrl = http://localhost:3000
 
-### Hämta alla boenden
+### ===== LYCKADE ANROP =====
+
+### Hämta alla boenden → 200
 GET {{baseUrl}}/properties
 
-### Hämta ett boende
-GET {{baseUrl}}/properties/1
-
-### Boende som inte finns → 404
-GET {{baseUrl}}/properties/999
-
-### Skapa boende → 201
+### Skapa boende → 201 (KÖR DENNA FÖRST – de andra använder dess id)
+# @name created
 POST {{baseUrl}}/properties
 Content-Type: application/json
 
@@ -20,7 +17,21 @@ Content-Type: application/json
   "price_per_night": 2500,
   "max_guests": 6
 }
-### Klienten försöker välja eget id → ska ignoreras
+
+### Hämta det skapade boendet → 200
+GET {{baseUrl}}/properties/{{created.response.body.id}}
+
+### Ändra pris → 200
+PATCH {{baseUrl}}/properties/{{created.response.body.id}}
+Content-Type: application/json
+
+{
+  "price_per_night": 2200
+}
+
+### ===== NEKADE ANROP =====
+
+### Klienten försöker välja eget id → id ignoreras (201 med databasens id)
 POST {{baseUrl}}/properties
 Content-Type: application/json
 
@@ -32,7 +43,8 @@ Content-Type: application/json
   "price_per_night": 500,
   "max_guests": 2
 }
-### Ogiltigt pris → borde ge 400, men ger 201 (fixas i fas 3)
+
+### Ogiltigt pris → 400
 POST {{baseUrl}}/properties
 Content-Type: application/json
 
@@ -43,40 +55,28 @@ Content-Type: application/json
   "price_per_night": "gratis",
   "max_guests": 2
 }
-### Ändra pris på boende → 200
-PATCH {{baseUrl}}/properties/1
-Content-Type: application/json
-
-{
-  "price_per_night": 1100
-}
-
-#### Ändra boende som inte finns → 404
-PATCH {{baseUrl}}/properties/999
-Content-Type: application/json
-
-{
-  "price_per_night": 1100
-}
-
-### Ta bort boende → 200
-DELETE {{baseUrl}}/properties/2
-
-### Kontroll: boendet är borta → 404
-GET {{baseUrl}}/properties/2
-
-### Ta bort boende som inte finns → 404
-DELETE {{baseUrl}}/properties/999
 
 ### PATCH med ogiltigt pris → 400
-PATCH {{baseUrl}}/properties/1
+PATCH {{baseUrl}}/properties/{{created.response.body.id}}
 Content-Type: application/json
 
 {
   "price_per_night": "gratis"
 }
 
-### Okänd route → 404 JSON
+### PATCH utan fält → 400
+PATCH {{baseUrl}}/properties/{{created.response.body.id}}
+Content-Type: application/json
+
+{}
+
+### Ogiltigt id (inte UUID) → 400
+GET {{baseUrl}}/properties/abc
+
+### Okänt id (giltig UUID som inte finns) → 404
+GET {{baseUrl}}/properties/00000000-0000-4000-8000-000000000000
+
+### Okänd route → 404
 GET {{baseUrl}}/finns-inte
 
 ### Trasig JSON → 400
@@ -84,3 +84,11 @@ POST {{baseUrl}}/properties
 Content-Type: application/json
 
 { detta är inte json
+
+### ===== TA BORT (KÖR SIST) =====
+
+### Ta bort det skapade boendet → 200
+DELETE {{baseUrl}}/properties/{{created.response.body.id}}
+
+### Kontroll: boendet är borta → 404
+GET {{baseUrl}}/properties/{{created.response.body.id}}

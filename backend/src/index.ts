@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { serve } from "@hono/node-server";
 import propertiesApp from "./routes/properties.js";
 import { HTTPException } from "hono/http-exception";
-
+import { env } from "./env.js";
 //Lagar appen
 const app = new Hono();
 
@@ -25,7 +25,7 @@ app.onError((err, c) => {
   return c.json({ error: "Internal Server Error" }, 500);
 });
 
-//startar servern på port 3000 och loggar att servern är igång
-serve({ fetch: app.fetch, port: 3000 }, (info) => {
+//startar serveren 
+serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   console.log(`Server running on http://localhost:${info.port}`);
 });

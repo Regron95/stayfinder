@@ -1,15 +1,19 @@
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 
-// Middleware för att validera inkommande JSON-data mot ett Zod-schema.
-export const validateJson = <T extends z.ZodType>(schema: T) =>
-  zValidator("json", schema, (result, c) => {
-    if (!result.success) {
+//För att validera inkommande data med Zod-scheman. Om valideringen misslyckas returneras ett JSON-svar med felmeddelanden.
+export const validate = <
+Target extends "json" | "param" | "query",
+T extends z.ZodType,
+>( 
+  target: Target,
+  schema: T,
+) => 
+ zValidator(target, schema, (result, c) => {
+  if (!result.success) {
+      const { formErrors, fieldErrors } = z.flattenError(result.error);
       return c.json(
-        {
-          error: "Ogiltig data",
-          fields: z.flattenError(result.error).fieldErrors,
-        },
+        { error: formErrors[0] ?? "Ogiltig data", fields: fieldErrors },
         400,
       );
     }

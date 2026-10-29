@@ -16,4 +16,12 @@ export const createPropertySchema = z.object({
 
 // Schema för att ändra ett boende (PATCH). Samma regler, men alla fält är valfria
 // eftersom klienten bara skickar det som ska ändras.
-export const updatePropertySchema = createPropertySchema.partial();
+export const updatePropertySchema = createPropertySchema
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Minst ett fält måste anges",
+  });
+
+export const idParamSchema = z.object({
+  id: z.uuid("Ogiltigt id"),
+});
