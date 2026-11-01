@@ -180,3 +180,29 @@ Content-Type: application/json
 
 ### 8. A tar bort sitt eget boende → 200
 DELETE http://localhost:3000/properties/{{ownedByA.response.body.id}}
+
+### ===== FAS 7: FILTER OCH SORTERING =====
+
+### Filtrera på plats (skiftlägesokänsligt) → 200
+GET http://localhost:3000/properties?location=stock
+
+### Maxpris + antal gäster → 200
+GET http://localhost:3000/properties?max_price=1000&guests=2
+
+### Sortera billigast först → 200
+GET http://localhost:3000/properties?sort=price_asc
+
+### Sortera dyrast först → 200
+GET http://localhost:3000/properties?sort=price_desc
+
+### Alla filter kombinerade → 200
+GET http://localhost:3000/properties?location=a&max_price=2000&guests=1&sort=price_asc
+
+### NEKAD: maxpris som text → 400
+GET http://localhost:3000/properties?max_price=gratis
+
+### NEKAD: ogiltig sortering → 400
+GET http://localhost:3000/properties?sort=random
+
+### NEKAD: 0 gäster → 400
+GET http://localhost:3000/properties?guests=0

@@ -5,6 +5,7 @@ import {
   createPropertySchema,
   updatePropertySchema,
   idParamSchema,
+  propertyQuerySchema,
 } from "../validators/property.js";
 import type { AppEnv } from "../lib/supabase.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -12,12 +13,25 @@ import { requirePropertyOwner } from "../middleware/ownership.js";
 
 const propertiesApp = new Hono<AppEnv>();
 
-// G4: Alla (även utloggade) kan se listan över boenden.
-propertiesApp.get("/", async (c) => {
-  const { data, error } = await c.var.supabase.from("properties").select("*");
-  // Supabase kastar inte fel utan returnerar { data, error } – vi kastar själva → onError → 500.
+// G4/G5/G8: Alla kan se boenden. Filter och sortering görs i DATABASEN, inte i frontenden.
+propertiesApp.get("/", validate("query", propertyQuerySchema), async (c) => {
+  const { location, max_price, guests, sort } = c.req.valid("query");
+
+  // Bygger frågan steg för steg – varje filter läggs bara till om det skickades med.
+  let query = c.var.supabase.from("properties").select("*");
+
+  // ilike = skiftlägesokänslig sökning, % = "vad som helst före/efter" → "stock" hittar "Stockholm"
+  if (location) query = query.ilike("location", `%${location}%`);
+  // lte = less than or equal (≤)
+  if (max_price !== undefined) query = query.lte("price_per_night", max_price);
+  // gte = greater than or equal (≥): boendet måste rymma MINST så många gäster
+  if (guests !== undefined) query = query.gte("max_guests", guests);
+  if (sort)
+    query = query.order("price_per_night", { ascending: sort === "price_asc" });
+
+  // Först här skickas frågan till databasen.
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
-  // Type assertion: Supabase känner inte till tabellens typ, men vi styr både tabell och typ.
   return c.json(data as Property[]);
 });
 
@@ -61,9 +75,9 @@ propertiesApp.post(
 propertiesApp.patch(
   "/:id",
   requireAuth,
-  requirePropertyOwner,
   validate("param", idParamSchema),
   validate("json", updatePropertySchema),
+  requirePropertyOwner,
   async (c) => {
     const { id } = c.req.valid("param");
     const body = c.req.valid("json");
