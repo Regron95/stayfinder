@@ -6,6 +6,7 @@ import { supabaseMiddleware } from "./middleware/auth.js";
 import type { AppEnv } from "./lib/supabase.js";
 import propertiesApp from "./routes/properties.js";
 import authApp from "./routes/auth.js";
+import bookingsApp from "./routes/bookings.js";
 
 // AppEnv gör c.var.supabase och c.var.user typade i alla routes. (G16)
 const app = new Hono<AppEnv>();
@@ -22,6 +23,8 @@ app.get("/health", (c) => {
 // Monterar route-filerna, t.ex. "/" i properties.ts blir /properties.
 app.route("/properties", propertiesApp);
 app.route("/auth", authApp);
+// Bokningar har egna fulla sökvägar (/bookings och /properties/:id/bookings), därför "/".
+app.route("/", bookingsApp);
 
 // Ingen route matchade → 404 som JSON istället för Honos text. (G14)
 app.notFound((c) => {

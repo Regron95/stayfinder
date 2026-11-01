@@ -30,3 +30,21 @@ export const requirePropertyOwner: MiddlewareHandler<AppEnv> = async (
   // Ägaren stämmer → släpp vidare till nästa middleware/handler.
   await next();
 };
+// VG1: Bara gästen som gjorde bokningen får ändra eller ta bort den.
+// Andra gäster ser inte bokningen alls (RLS) → 404.
+// Ägaren av boendet SER bokningen men får inte ändra den → 403.
+export const requireBookingOwner: MiddlewareHandler<AppEnv> = async (c, next) => {
+  const id = c.req.param("id");
+  const { data, error } = await c.var.supabase
+    .from("bookings")
+    .select("user_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return c.json({ error: "Booking not found" }, 404);
+  if (data.user_id !== c.var.user.id) {
+    return c.json({ error: "Du får bara ändra dina egna bokningar" }, 403);
+  }
+  await next();
+};

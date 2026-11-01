@@ -105,13 +105,13 @@ Content-Type: application/json
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{ "email": "claude-test@example.com", "password": "fel-losen" }
+{ "email": "{{$dotenv TEST_A_EMAIL}}", "password": "fel-losen" }
 
 ### Logga in → 200 (REST Client sparar cookien)
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
-{ "email": "claude-test@example.com", "password": "hemligt123" }
+{ "email": "{{$dotenv TEST_A_EMAIL}}", "password": "{{$dotenv TEST_A_PASSWORD}}" }
 
 ### Vem är inloggad? → 200
 GET {{baseUrl}}/auth/me
@@ -142,7 +142,7 @@ Content-Type: application/json
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
-{ "email": "claude-test@example.com", "password": "hemligt123" }
+{ "email": "{{$dotenv TEST_A_EMAIL}}", "password": "{{$dotenv TEST_A_PASSWORD}}" }
 
 ### 2. A skapar ett boende
 # @name ownedByA
@@ -155,7 +155,7 @@ Content-Type: application/json
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
-{ "email": "claude-test2@example.com", "password": "hemligt123" }
+{ "email": "{{$dotenv TEST_B_EMAIL}}", "password": "{{$dotenv TEST_B_PASSWORD}}" }
 
 ### 4. B försöker ändra A:s boende → 403
 PATCH http://localhost:3000/properties/{{ownedByA.response.body.id}}
@@ -170,7 +170,7 @@ DELETE http://localhost:3000/properties/{{ownedByA.response.body.id}}
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
-{ "email": "claude-test@example.com", "password": "hemligt123" }
+{ "email": "{{$dotenv TEST_A_EMAIL}}", "password": "{{$dotenv TEST_A_PASSWORD}}" }
 
 ### 7. A ändrar sitt eget boende → 200
 PATCH http://localhost:3000/properties/{{ownedByA.response.body.id}}
@@ -206,3 +206,81 @@ GET http://localhost:3000/properties?sort=random
 
 ### NEKAD: 0 gäster → 400
 GET http://localhost:3000/properties?guests=0
+### ===== FAS 8: BOKNINGAR =====
+
+### 1. Logga in som A (värd)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "{{$dotenv TEST_A_EMAIL}}", "password": "{{$dotenv TEST_A_PASSWORD}}" }
+
+### 2. A skapar ett boende (max 3 gäster, 500 kr/natt)
+# @name hostProperty
+POST http://localhost:3000/properties
+Content-Type: application/json
+
+{ "title": "Värdens hus", "description": "Test", "location": "Göteborg", "price_per_night": 500, "max_guests": 3 }
+
+### 3. Logga in som B (gäst)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "{{$dotenv TEST_B_EMAIL}}", "password": "{{$dotenv TEST_B_PASSWORD}}" }
+
+### 4. B bokar – fuskpris och status ignoreras → 201, total_price 1500 (VG6)
+# @name booking
+POST http://localhost:3000/properties/{{hostProperty.response.body.id}}/bookings
+Content-Type: application/json
+
+{ "guest_name": "Erik", "guest_email": "erik@test.se", "guests": 2, "check_in": "2026-12-01", "check_out": "2026-12-04", "total_price": 1, "status": "confirmed" }
+
+### 5. NEKAD: överlappande datum → 409 (VG2)
+POST http://localhost:3000/properties/{{hostProperty.response.body.id}}/bookings
+Content-Type: application/json
+
+{ "guest_name": "Erik", "guest_email": "erik@test.se", "guests": 1, "check_in": "2026-12-03", "check_out": "2026-12-06" }
+
+### 6. NEKAD: för många gäster → 400 (VG3)
+POST http://localhost:3000/properties/{{hostProperty.response.body.id}}/bookings
+Content-Type: application/json
+
+{ "guest_name": "Erik", "guest_email": "erik@test.se", "guests": 9, "check_in": "2027-01-01", "check_out": "2027-01-02" }
+
+### 7. NEKAD: ogiltig e-post, 0 gäster, utcheckning före incheckning → 400 (G10)
+POST http://localhost:3000/properties/{{hostProperty.response.body.id}}/bookings
+Content-Type: application/json
+
+{ "guest_name": "Erik", "guest_email": "inte-en-epost", "guests": 0, "check_in": "2026-12-05", "check_out": "2026-12-01" }
+
+### 8. B ser sina bokningar → 200 (VG1)
+GET http://localhost:3000/bookings
+
+### 9. Logga in som A igen
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "{{$dotenv TEST_A_EMAIL}}", "password": "{{$dotenv TEST_A_PASSWORD}}" }
+
+### 10. Värden ser alla bokningar på sitt boende → 200 (G12, VG1)
+GET http://localhost:3000/properties/{{hostProperty.response.body.id}}/bookings
+
+### 11. NEKAD: värden försöker ändra gästens bokning → 403 (VG1)
+PATCH http://localhost:3000/bookings/{{booking.response.body.id}}
+Content-Type: application/json
+
+{ "guests": 1 }
+
+### 12. Logga in som B igen
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "{{$dotenv TEST_B_EMAIL}}", "password": "{{$dotenv TEST_B_PASSWORD}}" }
+
+### 13. B avbokar → 200, status cancelled (G12)
+PATCH http://localhost:3000/bookings/{{booking.response.body.id}}
+Content-Type: application/json
+
+{ "status": "cancelled" }
+
+### 14. B tar bort sin bokning → 200 (G12)
+DELETE http://localhost:3000/bookings/{{booking.response.body.id}}
