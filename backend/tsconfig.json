@@ -1,11 +1,20 @@
 {
-  "compilerOptions" : {
-    "target": "esnext", //Vilken version av JavaScript. 
-    "module": "nodenext", // modulsystem 
-    "strict": true, // Aktiverar alla strikta typkontroller i TypeScript. 
-    "rootDir": "./src", // rotmapp - TypeScript-källkoden
-    "outDir": "./dist", // kompilerade JS hamnar här (körs i Node.js)
-    "types": ["node"], //  typer som ska inkluderas 
-    "skipLibCheck": true, // Hoppa över typkontroller för deklarationsfiler
+  "compilerOptions": {
+    // Vilken JS-version koden kompileras till. ESNext = senaste, Node 22 klarar det.
+    "target": "esnext",
+    // Följer Nodes egna modulregler. Hänger ihop med "type": "module" i package.json.
+    // Därför måste relativa importer sluta på .js.
+    "module": "nodenext",
+    // Strikta typkontroller – fångar flest fel innan koden körs. (G16)
+    "strict": true,
+    // Här ligger TypeScript-källkoden.
+    "rootDir": "./src",
+    // Hit hamnar den kompilerade JavaScript-koden som körs i produktion.
+    "outDir": "./dist",
+    // Måste anges från TypeScript 6: annars laddas inte @types/node
+    // och TypeScript känner inte till t.ex. process.env ("Cannot find name 'process'").
+    "types": ["node"],
+    // Hoppar över typkontroll av .d.ts-filer i node_modules – snabbare.
+    "skipLibCheck": true
   }
 }

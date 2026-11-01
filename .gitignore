@@ -1,3 +1,8 @@
+# Installeras igen med npm install (från package-lock.json)
 node_modules/
-dist/ 
+
+# Kompilerad kod, skapas igen med tsc
+dist/
+
+# SÄKERHET: hemliga nycklar – får aldrig hamna i Git (de finns kvar i historiken även om de tas bort)
 .env

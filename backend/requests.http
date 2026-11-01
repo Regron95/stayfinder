@@ -136,3 +136,47 @@ Content-Type: application/json
   "price_per_night": 700,
   "max_guests": 2
 }
+### ===== FAS 6: ÄGARSKAP =====
+
+### 1. Logga in som användare A
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "claude-test@example.com", "password": "hemligt123" }
+
+### 2. A skapar ett boende
+# @name ownedByA
+POST http://localhost:3000/properties
+Content-Type: application/json
+
+{ "title": "A:s stuga", "description": "Ägs av A", "location": "Dalarna", "price_per_night": 900, "max_guests": 4 }
+
+### 3. Logga in som användare B (cookien byts ut)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "claude-test2@example.com", "password": "hemligt123" }
+
+### 4. B försöker ändra A:s boende → 403
+PATCH http://localhost:3000/properties/{{ownedByA.response.body.id}}
+Content-Type: application/json
+
+{ "price_per_night": 1 }
+
+### 5. B försöker ta bort A:s boende → 403
+DELETE http://localhost:3000/properties/{{ownedByA.response.body.id}}
+
+### 6. Logga in som A igen
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{ "email": "claude-test@example.com", "password": "hemligt123" }
+
+### 7. A ändrar sitt eget boende → 200
+PATCH http://localhost:3000/properties/{{ownedByA.response.body.id}}
+Content-Type: application/json
+
+{ "price_per_night": 950 }
+
+### 8. A tar bort sitt eget boende → 200
+DELETE http://localhost:3000/properties/{{ownedByA.response.body.id}}
