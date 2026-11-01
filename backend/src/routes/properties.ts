@@ -6,19 +6,20 @@ import {
   updatePropertySchema,
   idParamSchema,
 } from "../validators/property.js";
-import { supabase } from "../lib/supabase.js";
+import type { AppEnv } from "../lib/supabase.js";
+import { requireAuth } from "../middleware/auth.js";
 
-const propertiesApp = new Hono();
+const propertiesApp = new Hono<AppEnv>();
 
 propertiesApp.get("/", async (c) => {
-  const { data, error } = await supabase.from("properties").select("*");
+  const { data, error } = await c.var.supabase.from("properties").select("*");
   if (error) throw new Error(error.message);
   return c.json(data as Property[]);
 });
 
 propertiesApp.get("/:id", validate("param", idParamSchema), async (c) => {
   const { id } = c.req.valid("param");
-  const { data, error } = await supabase
+  const { data, error } = await c.var.supabase
     .from("properties")
     .select("*")
     .eq("id", id)
@@ -29,9 +30,9 @@ propertiesApp.get("/:id", validate("param", idParamSchema), async (c) => {
   return c.json(data as Property);
 });
 
-propertiesApp.post("/", validate("json", createPropertySchema), async (c) => {
+propertiesApp.post("/", requireAuth, validate("json", createPropertySchema), async (c) => {
   const body = c.req.valid("json");
-  const { data, error } = await supabase
+  const { data, error } = await c.var.supabase
     .from("properties")
     .insert(body)
     .select()
@@ -43,12 +44,13 @@ propertiesApp.post("/", validate("json", createPropertySchema), async (c) => {
 
 propertiesApp.patch(
   "/:id",
+  requireAuth,
   validate("param", idParamSchema),
   validate("json", updatePropertySchema),
   async (c) => {
     const { id } = c.req.valid("param");
     const body = c.req.valid("json");
-    const { data, error } = await supabase
+    const { data, error } = await c.var.supabase
       .from("properties")
       .update(body)
       .eq("id", id)
@@ -61,9 +63,9 @@ propertiesApp.patch(
   },
 );
 
-propertiesApp.delete("/:id", validate("param", idParamSchema), async (c) => {
+propertiesApp.delete("/:id", requireAuth, validate("param", idParamSchema), async (c) => {
   const { id } = c.req.valid("param");
-  const { data, error } = await supabase
+  const { data, error } = await c.var.supabase
     .from("properties")
     .delete()
     .eq("id", id)

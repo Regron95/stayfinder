@@ -92,3 +92,47 @@ DELETE {{baseUrl}}/properties/{{created.response.body.id}}
 
 ### Kontroll: boendet är borta → 404
 GET {{baseUrl}}/properties/{{created.response.body.id}}
+
+### ===== AUTH =====
+
+### Registrera med ogiltig data → 400
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{ "email": "inte-en-epost", "password": "123" }
+
+### Logga in med fel lösenord → 401
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "claude-test@example.com", "password": "fel-losen" }
+
+### Logga in → 200 (REST Client sparar cookien)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "claude-test@example.com", "password": "hemligt123" }
+
+### Vem är inloggad? → 200
+GET {{baseUrl}}/auth/me
+
+### Logga ut → 200
+POST {{baseUrl}}/auth/logout
+
+### Vem är inloggad efter utloggning? → 401
+GET {{baseUrl}}/auth/me
+
+### Logga ut först
+POST {{baseUrl}}/auth/logout
+
+### Skapa boende utloggad → 401
+POST {{baseUrl}}/properties
+Content-Type: application/json
+
+{
+  "title": "Utan inloggning",
+  "description": "Test",
+  "location": "Luleå, Sverige",
+  "price_per_night": 700,
+  "max_guests": 2
+}
