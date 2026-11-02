@@ -7,9 +7,14 @@ import type { AppEnv } from "./lib/supabase.js";
 import propertiesApp from "./routes/properties.js";
 import authApp from "./routes/auth.js";
 import bookingsApp from "./routes/bookings.js";
+import { cors } from "hono/cors";
 
 // AppEnv gör c.var.supabase och c.var.user typade i alla routes. (G16)
 const app = new Hono<AppEnv>();
+
+// CORS: frontenden får anropa API:t och skicka med cookien.
+// credentials: true krävs för cookies – och då får origin inte vara "*".
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 
 // Körs på ALLA requests: skapar en Supabase-klient per request som läser användarens cookie.
 // Måste stå före app.route – middleware körs i den ordning de registreras.

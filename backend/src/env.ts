@@ -9,6 +9,8 @@ const envSchema = z.object({
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   // Allt i process.env är text – coerce gör om "3000" till talet 3000.
   PORT: z.coerce.number().default(3000),
+  // Adressen till frontenden – den enda som får anropa API:t från webbläsaren (CORS)
+  FRONTEND_URL: z.url().default("http://localhost:3001"),
 });
 
 export const env = envSchema.parse(process.env);
