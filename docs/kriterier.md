@@ -1,5 +1,7 @@
 # StayFinder – kriterier och plan
 
+> Planeringsdokument från start. Den slutliga listan över uppfyllda kriterier finns i [README.md](../README.md).
+
 Betygsgrundande uppgift, IG/G/VG, avslutas med muntlig kodgenomgång.
 Inlämning: 4 november 2026. Muntlig genomgång: 5 november 2026.
 
