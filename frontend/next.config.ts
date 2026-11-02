@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     agentFeedback: true,
   },
   cacheComponents: true,
+  // Tillåt exempelbilder från Unsplash i <Image> – bara den domänen, inga andra
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {

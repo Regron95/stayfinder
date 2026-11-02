@@ -92,7 +92,7 @@ export default function BookingItem({ booking, showPropertyLink, onUpdated, onDe
   const nights = countNights(booking.check_in, booking.check_out);
 
   return (
-    <li className="rounded-lg border p-4">
+    <li className="card p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="font-semibold">
           {booking.check_in} → {booking.check_out} · {nights} nätter · {booking.guests} gäster
@@ -114,19 +114,19 @@ export default function BookingItem({ booking, showPropertyLink, onUpdated, onDe
           <label className="flex flex-col gap-1 text-sm">
             Incheckning
             <input name="check_in" type="date" value={draft.check_in} onChange={update}
-              className="rounded border p-2" />
+              className="input" />
             <FieldError messages={fields.check_in} />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Utcheckning
             <input name="check_out" type="date" value={draft.check_out} onChange={update}
-              className="rounded border p-2" />
+              className="input" />
             <FieldError messages={fields.check_out} />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Gäster
             <input name="guests" type="number" min="1" value={draft.guests} onChange={update}
-              className="rounded border p-2" />
+              className="input" />
             <FieldError messages={fields.guests} />
           </label>
         </div>
@@ -139,7 +139,7 @@ export default function BookingItem({ booking, showPropertyLink, onUpdated, onDe
         <div className="mt-3 flex flex-wrap gap-3 text-sm">
           {editing ? (
             <>
-              <button onClick={save} disabled={busy} className="rounded bg-black px-3 py-1 text-white disabled:opacity-50">
+              <button onClick={save} disabled={busy} className="btn">
                 Spara
               </button>
               <button onClick={() => setEditing(false)} disabled={busy} className="underline">Avbryt</button>

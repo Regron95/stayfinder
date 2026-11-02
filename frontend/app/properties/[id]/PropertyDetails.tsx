@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { propertyImage } from "@/lib/images";
 import type { Property } from "@/lib/types";
 import BookingForm from "@/components/BookingForm";
 import BookingList from "@/components/BookingList";
@@ -50,14 +52,23 @@ export default function PropertyDetails() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <Link href="/" className="underline">← Alla boenden</Link>
-      <h1 className="mt-4 text-3xl font-bold">{property.title}</h1>
-      <p className="text-gray-600">{property.location}</p>
-      <p className="mt-4">{property.description}</p>
-      <p className="mt-4 font-semibold">
-        {property.price_per_night} kr/natt · max {property.max_guests} gäster
-      </p>
+    <main className="mx-auto w-full max-w-3xl p-6">
+      <Link href="/" className="text-sm text-gray-600 hover:underline">← Alla boenden</Link>
+      {/* Stor bild överst – samma bild som på kortet, fast större */}
+      <Image src={propertyImage(property.id, 1200, 600)} alt={property.title} width={1200} height={600}
+        className="mt-4 h-72 w-full rounded-2xl object-cover" />
+
+      <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">{property.title}</h1>
+          <p className="text-gray-600">{property.location}</p>
+        </div>
+        <p className="card px-4 py-2">
+          <span className="text-xl font-bold">{property.price_per_night} kr</span> / natt
+          <span className="block text-sm text-gray-600">Max {property.max_guests} gäster</span>
+        </p>
+      </div>
+      <p className="mt-4 leading-relaxed">{property.description}</p>
       {/* G9 + G11: bokningsformuläret (utloggad → uppmaning att logga in) */}
       <BookingForm property={property} onBooked={() => setReloadKey((k) => k + 1)} />
 

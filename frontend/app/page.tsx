@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Property } from "@/lib/types";
+import PropertyCard from "@/components/PropertyCard";
 
 // G4: Startsidan visar alla boenden från API:t.
 // "use client" = körs i webbläsaren, så fetch skickar med användarens cookie.
@@ -57,29 +57,34 @@ export default function HomePage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl p-8">
-      <h1 className="mb-6 text-3xl font-bold">Boenden</h1>
+    <main className="mx-auto w-full max-w-5xl p-6">
+      {/* Hero: rubrik och sökformulär på en färgad bakgrund */}
+      <section className="mb-8 rounded-3xl bg-linear-to-br from-rose-500 to-orange-400 p-8 text-white">
+        <h1 className="text-4xl font-bold">Hitta ditt nästa boende</h1>
+        <p className="mt-2 text-rose-50">Sök bland stugor, lägenheter och hus – och boka direkt.</p>
 
-      {/* G5 + G8: filter och sortering. Själva filtreringen och sorteringen görs i backenden.
-          type="number" och min="1" är bara för användarvänlighet – den riktiga valideringen
-          är propertyQuerySchema i API:t, eftersom vem som helst kan anropa API:t direkt. */}
-      <form onSubmit={handleSubmit} className="mb-6 grid gap-3 sm:grid-cols-5">
-        {/* Kontrollerade fält: value kommer från state, onChange uppdaterar state */}
-        <input aria-label="Plats" placeholder="Plats" value={location}
-          onChange={(e) => setLocation(e.target.value)} className="rounded border p-2" />
-        <input aria-label="Maxpris" placeholder="Maxpris" type="number" min="1" value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)} className="rounded border p-2" />
-        <input aria-label="Antal gäster" placeholder="Gäster" type="number" min="1" value={guests}
-          onChange={(e) => setGuests(e.target.value)} className="rounded border p-2" />
-        {/* value måste matcha backendens z.enum(["price_asc", "price_desc"]) */}
-        <select aria-label="Sortering" value={sort}
-          onChange={(e) => setSort(e.target.value)} className="rounded border p-2">
-          <option value="">Ingen sortering</option>
-          <option value="price_asc">Pris: lägst först</option>
-          <option value="price_desc">Pris: högst först</option>
-        </select>
-        <button type="submit" className="rounded bg-black p-2 text-white">Sök</button>
-      </form>
+        {/* G5 + G8: filter och sortering. Själva filtreringen och sorteringen görs i backenden.
+            type="number" och min="1" är bara för användarvänlighet – den riktiga valideringen
+            är propertyQuerySchema i API:t, eftersom vem som helst kan anropa API:t direkt. */}
+        <form onSubmit={handleSubmit}
+          className="mt-6 grid gap-3 rounded-2xl bg-white p-3 text-gray-900 sm:grid-cols-5">
+          {/* Kontrollerade fält: value kommer från state, onChange uppdaterar state */}
+          <input aria-label="Plats" placeholder="Plats" value={location}
+            onChange={(e) => setLocation(e.target.value)} className="input" />
+          <input aria-label="Maxpris" placeholder="Maxpris" type="number" min="1" value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)} className="input" />
+          <input aria-label="Antal gäster" placeholder="Gäster" type="number" min="1" value={guests}
+            onChange={(e) => setGuests(e.target.value)} className="input" />
+          {/* value måste matcha backendens z.enum(["price_asc", "price_desc"]) */}
+          <select aria-label="Sortering" value={sort}
+            onChange={(e) => setSort(e.target.value)} className="input">
+            <option value="">Ingen sortering</option>
+            <option value="price_asc">Pris: lägst först</option>
+            <option value="price_desc">Pris: högst först</option>
+          </select>
+          <button type="submit" className="btn">Sök</button>
+        </form>
+      </section>
 
       {/* Formuläret visas alltid – bara listan växlar mellan laddar, fel och data.
           {villkor && <x/>} = visa <x/> bara om villkoret är sant */}
@@ -89,15 +94,11 @@ export default function HomePage() {
       {!loading && !error && properties.length === 0 && <p>Inga boenden matchar sökningen.</p>}
 
       {!loading && !error && (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {/* key = unikt id så att React vet vilket element som är vilket */}
           {properties.map((property) => (
-            <li key={property.id} className="rounded-lg border p-4">
-              <Link href={`/properties/${property.id}`} className="text-xl font-semibold hover:underline">
-                {property.title}
-              </Link>
-              <p className="text-gray-600">{property.location}</p>
-              <p>{property.price_per_night} kr/natt · max {property.max_guests} gäster</p>
+            <li key={property.id}>
+              <PropertyCard property={property} />
             </li>
           ))}
         </ul>

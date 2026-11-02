@@ -62,7 +62,7 @@ export default function AuthForm({ mode }: Props) {
         <label className="flex flex-col gap-1">
           E-post
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-            className="rounded border p-2" required />
+            className="input" required />
           {/* fields.email?.[0] = första felet för e-post, om det finns */}
           {fields.email && <span className="text-sm text-red-600">{fields.email[0]}</span>}
         </label>
@@ -72,14 +72,14 @@ export default function AuthForm({ mode }: Props) {
           {/* type="password" döljer tecknen. autoComplete hjälper lösenordshanterare. */}
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
             autoComplete={isLogin ? "current-password" : "new-password"}
-            className="rounded border p-2" required />
+            className="input" required />
           {fields.password && <span className="text-sm text-red-600">{fields.password[0]}</span>}
         </label>
 
         {error && <p className="text-red-600">{error}</p>}
 
         <button type="submit" disabled={submitting}
-          className="rounded bg-black p-2 text-white disabled:opacity-50">
+          className="btn">
           {submitting ? "Vänta..." : isLogin ? "Logga in" : "Skapa konto"}
         </button>
       </form>

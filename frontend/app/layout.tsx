@@ -31,7 +31,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {/* AuthProvider omsluter allt, så att menyn och alla sidor kan använda useAuth() */}
         <AuthProvider>
-          <header className="border-b">
+          {/* sticky = menyn stannar kvar överst när man scrollar */}
+          <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/90 backdrop-blur">
             <Nav />
           </header>
           {children}

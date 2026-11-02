@@ -98,20 +98,20 @@ export default function NewPropertyPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col gap-1">
           Titel
-          <input name="title" value={form.title} onChange={update} className="rounded border p-2" />
+          <input name="title" value={form.title} onChange={update} className="input" />
           <FieldError messages={fields.title} />
         </label>
 
         <label className="flex flex-col gap-1">
           Beskrivning
           <textarea name="description" value={form.description} onChange={update} rows={4}
-            className="rounded border p-2" />
+            className="input" />
           <FieldError messages={fields.description} />
         </label>
 
         <label className="flex flex-col gap-1">
           Plats
-          <input name="location" value={form.location} onChange={update} className="rounded border p-2" />
+          <input name="location" value={form.location} onChange={update} className="input" />
           <FieldError messages={fields.location} />
         </label>
 
@@ -119,14 +119,14 @@ export default function NewPropertyPage() {
           <label className="flex flex-col gap-1">
             Pris per natt (kr)
             <input name="price_per_night" type="number" min="1" value={form.price_per_night}
-              onChange={update} className="rounded border p-2" />
+              onChange={update} className="input" />
             <FieldError messages={fields.price_per_night} />
           </label>
 
           <label className="flex flex-col gap-1">
             Max antal gäster
             <input name="max_guests" type="number" min="1" step="1" value={form.max_guests}
-              onChange={update} className="rounded border p-2" />
+              onChange={update} className="input" />
             <FieldError messages={fields.max_guests} />
           </label>
         </div>
@@ -134,7 +134,7 @@ export default function NewPropertyPage() {
         {error && <p className="text-red-600">{error}</p>}
 
         <button type="submit" disabled={submitting}
-          className="rounded bg-black p-2 text-white disabled:opacity-50">
+          className="btn">
           {submitting ? "Sparar..." : "Skapa boende"}
         </button>
       </form>

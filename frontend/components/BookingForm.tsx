@@ -70,7 +70,7 @@ export default function BookingForm({ property, onBooked }: Props) {
   // G9: utloggad besökare uppmanas att logga in
   if (!user) {
     return (
-      <section className="mt-8 rounded-lg border p-4">
+      <section className="card mt-8 p-6">
         <h2 className="text-xl font-semibold">Boka</h2>
         <p className="mt-2">
           <Link href="/login" className="underline">Logga in</Link> för att boka detta boende.
@@ -80,20 +80,20 @@ export default function BookingForm({ property, onBooked }: Props) {
   }
 
   return (
-    <section className="mt-8 rounded-lg border p-4">
+    <section className="card mt-8 p-6">
       <h2 className="mb-4 text-xl font-semibold">Boka</h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1">
             Namn
-            <input name="guest_name" value={form.guest_name} onChange={update} className="rounded border p-2" />
+            <input name="guest_name" value={form.guest_name} onChange={update} className="input" />
             <FieldError messages={fields.guest_name} />
           </label>
           <label className="flex flex-col gap-1">
             E-post
             <input name="guest_email" type="email" value={form.guest_email} onChange={update}
-              className="rounded border p-2" />
+              className="input" />
             <FieldError messages={fields.guest_email} />
           </label>
         </div>
@@ -103,19 +103,19 @@ export default function BookingForm({ property, onBooked }: Props) {
             Incheckning
             {/* type="date" ger alltid "YYYY-MM-DD" – samma format som z.iso.date i backenden */}
             <input name="check_in" type="date" min={today()} value={form.check_in} onChange={update}
-              className="rounded border p-2" />
+              className="input" />
             <FieldError messages={fields.check_in} />
           </label>
           <label className="flex flex-col gap-1">
             Utcheckning
             <input name="check_out" type="date" min={form.check_in || today()} value={form.check_out}
-              onChange={update} className="rounded border p-2" />
+              onChange={update} className="input" />
             <FieldError messages={fields.check_out} />
           </label>
           <label className="flex flex-col gap-1">
             Gäster (max {property.max_guests})
             <input name="guests" type="number" min="1" max={property.max_guests} value={form.guests}
-              onChange={update} className="rounded border p-2" />
+              onChange={update} className="input" />
             <FieldError messages={fields.guests} />
           </label>
         </div>
@@ -131,7 +131,7 @@ export default function BookingForm({ property, onBooked }: Props) {
         {success && <p className="text-green-700">{success}</p>}
 
         <button type="submit" disabled={submitting}
-          className="rounded bg-black p-2 text-white disabled:opacity-50">
+          className="btn">
           {submitting ? "Bokar..." : "Boka"}
         </button>
       </form>

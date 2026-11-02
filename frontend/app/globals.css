@@ -1,26 +1,25 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Ljust tema för hela appen */
+body {
+  @apply bg-stone-50 font-sans text-gray-900;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Återanvändbara klasser: samma stil överallt och kortare className i komponenterna.
+   @apply = samla flera Tailwind-klasser under ett namn. */
+@layer components {
+  .input {
+    @apply rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100;
+  }
+  .btn {
+    @apply rounded-lg bg-rose-500 px-4 py-2 font-semibold text-white transition hover:bg-rose-600 disabled:opacity-50;
+  }
+  .card {
+    @apply rounded-2xl border border-gray-200 bg-white shadow-sm;
+  }
 }
