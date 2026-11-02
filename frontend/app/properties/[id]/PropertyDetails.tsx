@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import type { Property } from "@/lib/types";
+import BookingForm from "@/components/BookingForm";
+import BookingList from "@/components/BookingList";
 
 // G4: Detaljsida för ett boende. URL:en /properties/abc → id = "abc".
 // Client Component: körs i webbläsaren (useParams, useState, fetch med cookie).
@@ -13,6 +16,9 @@ export default function PropertyDetails() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { user } = useAuth();
+  // Ökas efter en ny bokning. Ny key på BookingList → React skapar om den → listan hämtas igen.
+  const [reloadKey, setReloadKey] = useState(0);
 
   // [id] = körs igen om id:t i URL:en ändras
   useEffect(() => {
@@ -52,7 +58,14 @@ export default function PropertyDetails() {
       <p className="mt-4 font-semibold">
         {property.price_per_night} kr/natt · max {property.max_guests} gäster
       </p>
-      {/* G9: bokningsformuläret kommer här i fas 11 */}
+      {/* G9 + G11: bokningsformuläret (utloggad → uppmaning att logga in) */}
+      <BookingForm property={property} onBooked={() => setReloadKey((k) => k + 1)} />
+
+      {/* G12 + VG1: gästen ser sina bokningar, ägaren av boendet ser alla */}
+      {user && (
+        <BookingList key={reloadKey} path={`/properties/${property.id}/bookings`}
+          title="Bokningar för boendet" emptyText="Inga bokningar som du kan se." />
+      )}
     </main>
   );
 }
