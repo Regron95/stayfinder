@@ -10,3 +10,10 @@ export type Property = {
   owner_id: string | null;
   created_at: string;
 };
+
+// G2: Det backenden skickar från /auth/login, /auth/register och /auth/me.
+// Bara id och e-post – backenden skickar inte hela användarobjektet.
+export type User = {
+  id: string;
+  email: string;
+};

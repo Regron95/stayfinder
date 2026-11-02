@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import Nav from "@/components/Nav";
+import { AuthProvider } from "@/lib/auth";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,14 +29,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="border-b">
-          <nav className="mx-auto flex max-w-4xl items-center gap-6 p-4">
-            <Link href="/" className="text-xl font-bold">StayFinder</Link>
-            <Link href="/" className="hover:underline">Boenden</Link>
-            {/* G3: i fas 10 visar menyn olika länkar för inloggad och utloggad */}
-          </nav>
-        </header>
-        {children}
+        {/* AuthProvider omsluter allt, så att menyn och alla sidor kan använda useAuth() */}
+        <AuthProvider>
+          <header className="border-b">
+            <Nav />
+          </header>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
